@@ -13,7 +13,7 @@ use vm::file_format::*;
 use vm_cache_map::Arena;
 
 fn test_module(name: String) -> CompiledModule {
-    CompiledModule {
+    CompiledModuleMut {
         module_handles: vec![ModuleHandle {
             name: StringPoolIndex::new(0),
             address: AddressPoolIndex::new(0),
@@ -70,10 +70,12 @@ fn test_module(name: String) -> CompiledModule {
         byte_array_pool: vec![],
         address_pool: vec![AccountAddress::default()],
     }
+    .freeze()
+    .expect("test module should satisfy bounds checker")
 }
 
 fn test_script() -> CompiledScript {
-    CompiledScript {
+    CompiledScriptMut {
         main: FunctionDefinition {
             function: FunctionHandleIndex::new(0),
             flags: CodeUnit::PUBLIC,
@@ -127,7 +129,10 @@ fn test_script() -> CompiledScript {
         byte_array_pool: vec![],
         address_pool: vec![AccountAddress::default()],
     }
+    .freeze()
+    .expect("test script should satisfy bounds checker")
 }
+
 #[test]
 fn test_loader_one_module() {
     // This test tests the linking of function within a single module: We have a module that defines
@@ -307,7 +312,7 @@ fn test_multi_level_cache_write_back() {
     vm_cache.cache_module(module).unwrap();
 
     // Create a new script that refers to both published and unpublished modules.
-    let script = CompiledScript {
+    let script = CompiledScriptMut {
         main: FunctionDefinition {
             function: FunctionHandleIndex::new(0),
             flags: CodeUnit::PUBLIC,
@@ -370,7 +375,9 @@ fn test_multi_level_cache_write_back() {
         ],
         byte_array_pool: vec![],
         address_pool: vec![AccountAddress::default()],
-    };
+    }
+    .freeze()
+    .expect("test script should satisfy bounds checker");
 
     let owned_entry_module = script.into_module();
     let loaded_main = LoadedModule::new(owned_entry_module).unwrap();

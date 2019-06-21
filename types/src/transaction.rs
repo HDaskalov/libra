@@ -161,6 +161,10 @@ impl RawTransaction {
             self.expiration_time,
         )
     }
+    /// Return the sender of this transaction.
+    pub fn sender(&self) -> AccountAddress {
+        self.sender
+    }
 }
 
 pub struct RawTransactionBytes<'a>(pub &'a [u8]);
@@ -260,7 +264,7 @@ impl fmt::Debug for SignedTransaction {
 }
 
 impl SignedTransaction {
-    pub fn new_for_test(
+    pub fn craft_signed_transaction_for_client(
         raw_txn: RawTransaction,
         public_key: PublicKey,
         signature: Signature,
